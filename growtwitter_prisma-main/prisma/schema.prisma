@@ -1,0 +1,75 @@
+  // This is your Prisma schema file,
+  // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+
+  generator client {
+    provider = "prisma-client-js"
+  }
+
+  datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+  }
+
+
+  model Usuario {
+    id String @id @default(uuid())
+    nome String @db.VarChar(50)
+    email String @unique @db.VarChar(50)
+    senha String @db.VarChar(50)
+    token String?
+    tweets Tweet[]
+    likes Like[]
+    seguidores Seguidor[]
+    seguidos Seguidor[] @relation("Seguidores")
+
+    dhrCriacao DateTime @default(now()) @map("dhr_criacao")
+    dhrAtualizacao DateTime @updatedAt @map("dhr_atualizacao")
+
+    @@map("usuario")
+  }
+
+  model Seguidor {
+    id String @id @default(uuid())
+    idUsuario String @map("id_usuario")
+    idSeguido String @map("id_seguido")
+    usuario Usuario @relation(fields: [idUsuario], references: [id])
+    seguido Usuario @relation("Seguidores", fields: [idSeguido], references: [id])
+
+    dhrCriacao DateTime @default(now()) @map("dhr_criacao")
+    dhrAtualizacao DateTime @updatedAt @map("dhr_atualizacao")
+
+    @@map("seguidor")
+  }
+
+  enum Tipo {
+    Normal
+    Reply
+  }
+
+  model Tweet {
+    id String @id @default(uuid())
+    conteudo String
+    tipo Tipo
+    idUsuario String @map("id_usuario")
+    usuario Usuario @relation(fields: [idUsuario], references: [id])
+    likes Like[]
+
+    dhrCriacao DateTime @default(now()) @map("dhr_criacao")
+    dhrAtualizacao DateTime @updatedAt @map("dhr_atualizacao")
+
+    @@map("tweet")
+  }
+
+  model Like {
+    id String @id @default(uuid())
+    idUsuario String @map("id_usuario")
+    idTweet String @map("id_tweet")
+    usuario Usuario @relation(fields: [idUsuario], references: [id])
+    tweet Tweet @relation(fields: [idTweet], references: [id])
+
+    dhrCriacao DateTime @default(now()) @map("dhr_criacao")
+    dhrAtualizacao DateTime @updatedAt @map("dhr_atualizacao")
+
+    @@map("like")
+  }
